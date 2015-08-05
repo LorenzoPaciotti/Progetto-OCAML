@@ -5,6 +5,12 @@ Dato un vertice V0 determinare, se esiste, un circuito (cammino chiuso da V0 a V
 Si risolva il problema utilizzando una ricerca best first.
 Come funzione di valutazione si può usare il numero di archi di E’ presenti nel circuito.
 *)
+(*
+DA FARE:
+-presentare almeno 3 casi 
+-calcolare complessità
+-studiare tutti gli algoritmi di ricerca
+*)
 (* rappresentazione esplicita del grafo *)
 let f = function
 1 -> [2;5]
@@ -17,21 +23,33 @@ let f = function
 | _ -> [];;
 
 type 'a graph = Graph of ('a -> 'a list);;
+let g = Graph f;;
+
+(*let grafo = [(1,2);(1,5);(2,1);(2,3);(2,5);(3,2);(3,4);(3,6);(4,3);(5,1);(5,2);(5,6);(6,3);(6,5);(6,7);(7,6)];;*)
+
+let lunghezze = [ ((1,2),3); ((1,5),6); ((2,1),4); ((2,3),5); ((2,5),6); ((3,2),5); ((3,4),4); ((3,6),3); ((4,3),4); ((5,1),5); ((5,2),6); ((5,6),5); ((6,3),4); ((6,5),5); ((6,7),6); ((7,6),5) ];;
 
 let rec stampalista = function [] -> print_newline()
 | x::rest -> print_int(x); print_string("; "); stampalista rest;;
 
-let coordinate = [ (1, (0,3)); (2, (4,6)); (3, (7,6)); (4, (11,6)); (5, (3,0)); (6, (6,0)); (7, (11,3))];;
+let cercaLunghezza listaLunghezze x y =
+	let ris = -1
+	in let rec aux sottoLista = match sottoLista with
+ 		[] -> ris
+ 		| z::rest ->
+ 			if (fst z = (x,y)) then
+				snd z
+ 			else
+ 				aux(rest)
+	in aux(listaLunghezze);;
 
-let distanza nodo1 nodo2 =
-let x1 = float (fst(List.assoc nodo1 coordinate))
-in let y1 = float (snd(List.assoc nodo1 coordinate))
-in let x2 = float (fst(List.assoc nodo2 coordinate))
-in let y2 = float (snd(List.assoc nodo2 coordinate))
-in sqrt ( (x1 -. x2)**2. +. (y1 -. y2)**2.);;
+(*fra 1 e 2 la lunghezza è 3*)
+(*test*)
+cercaLunghezza lunghezze 1 5;;
+
 
 let piuvicino (cammino1, cammino2, meta) =
-(distanza (List.hd cammino1) meta) < (distanza (List.hd cammino2) meta);;
+(cercaLunghezza lunghezze (List.hd cammino1) meta) < (cercaLunghezza lunghezze (List.hd cammino2) meta);;
 
 let confrontacammino cammino1 cammino2 meta=
 if List.hd cammino1= List.hd cammino2
@@ -41,6 +59,7 @@ then -1
 else 1;;
 
 exception NotFound;;
+
 
 let searchbf inizio fine (Graph succ)=
 let estendi cammino = stampalista cammino;
@@ -56,3 +75,5 @@ else search_aux fine (List.sort
 confronta
 (rest @ (estendi cammino)))
 in search_aux fine [[inizio]];;
+
+searchbf 1 7 g;;

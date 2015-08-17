@@ -11,6 +11,8 @@ DA FARE:
 -calcolare complessità
 -studiare tutti gli algoritmi di ricerca
 *)
+(*funzione euristica: metto in testa gli archi che fanno parte di insiemeArchiObiettivo, minimizzando però il numero di passaggi*)
+
 (* rappresentazione esplicita del grafo *)
 let f = function
 1 -> [2;5]
@@ -19,7 +21,7 @@ let f = function
 | 4 -> [3]
 | 5 -> [1;2;6]
 | 6 -> [3;5;7]
-|7 -> [6]
+| 7 -> [6]
 | _ -> [];;
 
 type 'a graph = Graph of ('a -> 'a list);;
@@ -27,6 +29,19 @@ let g = Graph f;;
 
 (*let grafo = [(1,2);(1,5);(2,1);(2,3);(2,5);(3,2);(3,4);(3,6);(4,3);(5,1);(5,2);(5,6);(6,3);(6,5);(6,7);(7,6)];;*)
 
+(*devo passare per questi archi*)
+let insiemeArchiObiettivo = [(3,4),(3,6),(5,6)];;
+
+(*lunghezza massima*)
+let k = 10;;
+
+(*controllo obiettivo*)
+let checkFinito x listaAttraversati = 
+	if x<=k
+	then 1 else 0;;
+
+print_int (checkFinito 11 insiemeArchiObiettivo);;
+(*lunghezze degli archi*)
 let lunghezze = [ ((1,2),3); ((1,5),6); ((2,1),4); ((2,3),5); ((2,5),6); ((3,2),5); ((3,4),4); ((3,6),3); ((4,3),4); ((5,1),5); ((5,2),6); ((5,6),5); ((6,3),4); ((6,5),5); ((6,7),6); ((7,6),5) ];;
 
 let rec stampalista = function [] -> print_newline()
@@ -43,10 +58,6 @@ let cercaLunghezza listaLunghezze x y =
  				aux(rest)
 	in aux(listaLunghezze);;
 
-(*fra 1 e 2 la lunghezza è 3*)
-(*test*)
-cercaLunghezza lunghezze 1 5;;
-
 
 let piuvicino (cammino1, cammino2, meta) =
 (cercaLunghezza lunghezze (List.hd cammino1) meta) < (cercaLunghezza lunghezze (List.hd cammino2) meta);;
@@ -58,22 +69,19 @@ else if piuvicino (cammino1, cammino2, meta)
 then -1
 else 1;;
 
+
 exception NotFound;;
-
-
 let searchbf inizio fine (Graph succ)=
-let estendi cammino = stampalista cammino;
-List.map (function x -> x::cammino)
-(List.filter (function x -> not (List.mem x cammino)) (succ (List.hd cammino)))
-in let confronta c1 c2 =
-confrontacammino c1 c2 fine
-in let rec search_aux fine = function
-[] -> raise NotFound
-| cammino::rest -> if fine = List.hd cammino
-then List.rev cammino
-else search_aux fine (List.sort
-confronta
-(rest @ (estendi cammino)))
-in search_aux fine [[inizio]];;
+	let estendi cammino = stampalista cammino;
+		List.map (function x -> x::cammino) (List.filter (function x -> not (List.mem x cammino)) (succ (List.hd cammino)))
+	in let confronta c1 c2 = confrontacammino c1 c2 fine
+		in let rec search_aux fine = function
+				[] -> raise NotFound
+				| cammino::rest -> if fine = List.hd cammino
+				then List.rev cammino
+				else search_aux fine (List.sort confronta (rest @ (estendi cammino)))
+		in search_aux fine [[inizio]];;
 
-searchbf 1 7 g;;
+
+(*test*)
+(*searchbf 1 7 g;;*)
